@@ -8,17 +8,17 @@ const postSchema = new Schema(
       required: true
     },
     image: {
-      
+      type:String,
     },
     content: {
       type: String,
       required: true
     },
-    /*creator: {
+    creator: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Employee',
       required: true
-    }*/
+    }
   },
   { timestamps: true }
 );

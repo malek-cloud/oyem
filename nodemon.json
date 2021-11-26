@@ -1,0 +1,9 @@
+{
+    "env": {
+        "DB_USER": "malek",
+        "DB_NAME": "OyemUnity",
+        "DB_PASSWORD": "kisstherain",
+        "JWT_TOKEN": "somesupersecretsecret"
+    }
+
+}

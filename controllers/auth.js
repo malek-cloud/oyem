@@ -36,7 +36,7 @@ exports.signup = (req, res, next) => {
           email: email,
           userId: result._id.toString()
         },
-        'somesupersecretsecret',
+        process.env.JWT_TOKEN,
         { expiresIn: '1h' }
       );
       res.status(201).json({ message: 'User created!', userId: result._id, token : token, expiryDate : '1' });
@@ -75,7 +75,7 @@ exports.login = (req, res, next) => {
           email: loadedUser.email,
           userId: loadedUser._id.toString()
         },
-        'somesupersecretsecret',
+        process.env.JWT_TOKEN,
         { expiresIn: '1h' }
       );
       res.status(200).json({ token: token, userId: loadedUser._id.toString(), expiryDate: '1', });

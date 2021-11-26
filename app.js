@@ -7,16 +7,24 @@ const multer = require('multer');
 
 const feedRoutes = require('./routes/posts');
 const authRoutes = require('./routes/auth');
+const employeeRoutes = require('./routes/employee');
 
 const app = express();
+
+
+//DISKSTORAGE
 const fileStorage = multer.diskStorage({
-  destination : (req,file,cb)=>{
-    cb(null, 'images')
+  destination: (req, file, cb) => {
+    cb(null, './images');
   },
-  filename : (req, file, cb)=>{
-    cb(null, new Date().toISOString +'-'+file.originalname);
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + '-' + file.originalname);
   }
 });
+
+
+
+//FILTER
 const fileFilter = (req, file, cb)=>{
   if(
     file.mimetype === 'image/png' ||
@@ -34,12 +42,21 @@ const fileFilter = (req, file, cb)=>{
   }
 };
 
-
-app.use(bodyParser.urlencoded({extended: true})); // x-www-form-urlencoded <form>
+app.use(bodyParser.urlencoded({extended: false})); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
+app.use(
+  multer({ storage: fileStorage,limits: {
+    fieldNameSize: 500,
+    fileSize: 3048576, // 10 Mb
+  },
+   fileFilter: fileFilter }).single('image')
+);
 app.use('/images', express.static(path.join(__dirname,'images')));
+app.use(express.static(path.join('public')));
 
-app.use(multer({storage: fileStorage, fileFilter:fileFilter }).single('image'));
+
+
+
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -52,6 +69,10 @@ app.use((req, res, next) => {
 
 app.use('/', feedRoutes);
 app.use('/auth', authRoutes);
+app.use('/employee', employeeRoutes);
+app.use((req, res, next)=>{
+  res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+})
 
 app.use((error, req, res, next) => {
   console.log(error);
@@ -62,11 +83,14 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
+
   .connect(
-    'mongodb+srv://malek-02:wL2Y3cu2xeF3HIym@cluster0.2mjlv.mongodb.net/OyemUnity?retryWrites=true&w=majority',
+    `mongodb+srv://${process.env.DB_USER}-01:${process.env.DB_PASSWORD}@cluster0.2mjlv.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(result => {
-    app.listen(5000);
+    app.listen(process.env.PORT || 5000);
   })
   .catch(err => console.log(err));
+
+  

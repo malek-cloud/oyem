@@ -1,9 +1,9 @@
 const Post = require('../models/post');
-const user = require('../models/user');
+const Employee = require('../models/employee');
 const fs = require('fs');
 const path = require('path');
 const { validationResult } = require('express-validator');
-exports.createPost =(req, res)=>{
+exports.createPost = async (req, res)=> {
      const errors = validationResult(req);
      if(!errors.isEmpty()){
           const error = new Error("Validation failed , entered data is incorrect.");
@@ -12,32 +12,37 @@ exports.createPost =(req, res)=>{
           throw error ;
      }
     /* if (!req.file) {
+           
           const error = new Error('No image provided.');
           error.statusCode = 422;
-          throw error;
+          throw error;      
         }*/
+
      const title = req.body.title;
      const content = req.body.content;
-     const image = req.file.path;
-   //  let creator ;
+     const employeeId = req.body.employeeId;
+     //const image = req.file.path;
+     let creator ;
+     let owner ;
      const post = new Post({
           title : title ,
-          image : image ,
+         /* image : image ,*/
           content : content ,
-        //  creator : req.userId 
+          creator : employeeId
      });
-      post.save()/*.then(
+      post.save().then(
           result =>{
-               return user.findById(req.userId);
-          }).then(user =>
+               return Employee.findById(employeeId);
+          }).then(employee =>
                {
-                    user.posts.push(post);
-                    return user.save();
-               })*/.then(result => {
+                    owner = employee ; 
+                    employee.posts.push(post);
+                    return employee.save();
+               }).then(result => {
                     res.statusCode(200).json({
                          message  :"post created alright hamdoulillah",
                          post : post,
-                        // creator : creator
+                         employe : owner
                     });
                })
                .catch(
@@ -53,17 +58,17 @@ exports.createPost =(req, res)=>{
 
 exports.getPosts  = (req, res)=>{
      Post.find().then(posts =>{
-          res.statusCode(200).json({
+          res.json({
                message : 'here is the posts',
                posts : posts,
-          }).catch(err =>{
-               if(!err.statusCode){
-                    err.statusCode = 500
-               }
-               next(err);
-          });
+          })})}
+          /*.catch(
+     err =>{
+          if(!err.statusCode){
+               err.statusCode =500;
+          }
      });
-};
+}*/
 exports.getPost = (req, res)=>{
      const postId = req.params.postId;
      Post.findById(postId).then(post =>
@@ -81,7 +86,6 @@ exports.getPost = (req, res)=>{
                if(!err.statusCode){
                     err.statusCode=500 ;
                }
-               next(err);
           });
 };
 exports.updatePost = (req, res)=> {
@@ -109,7 +113,7 @@ exports.updatePost = (req, res)=> {
                error.statusCode = 404;
                throw error;
           }
-          if (post.creator.toString() !== req.userId) {
+          if (post.creator.toString() !== req.employeeId) {
                const error = new Error('Not authorized!');
                error.statusCode = 403;
                throw error;
@@ -142,21 +146,21 @@ exports.deletePost = (req, res, next) => {
            error.statusCode = 404;
            throw error;
          }
-         if (post.creator.toString() !== req.userId) {//req,userId mafhemtch mnin 9a3da tji
+         if (post.creator.toString() !== req.employeeId) {//req,employeeId mafhemtch mnin 9a3da tji
            const error = new Error('Not authorized!');
            error.statusCode = 403;
            throw error;
          }
-         // Check logged in user
+         // Check logged in employee
          clearImage(post.imageUrl);//why ? maw ki nfassa5 el post el image tettefsa5 betbi3etha
          return Post.findByIdAndRemove(postId);
        })
        .then(result => {
-         return User.findById(req.userId);
+         return employee.findById(req.employeeId);
        })
-       .then(user => {
-         user.posts.pull(postId);
-         return user.save();
+       .then(employee => {
+         employee.posts.pull(postId);
+         return employee.save();
        })
        .then(result => {
          res.status(200).json({ message: 'Deleted post.' });
@@ -173,3 +177,6 @@ const clearImage = filePath => {
      filePath = path.join(__dirname, '..', filePath);
      fs.unlink(filePath, err => console.log(err));
    };
+
+
+   

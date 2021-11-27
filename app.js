@@ -15,7 +15,7 @@ const app = express();
 //DISKSTORAGE
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './images');
+    cb(null, './photos');
   },
   filename: (req, file, cb) => {
     cb(null, new Date().toISOString() + '-' + file.originalname);
@@ -51,7 +51,7 @@ app.use(
   },
    fileFilter: fileFilter }).single('image')
 );
-app.use('/images', express.static(path.join(__dirname,'images')));
+app.use('/photos', express.static(path.join(__dirname,'photos')));
 app.use(express.static(path.join('public')));
 
 

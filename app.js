@@ -85,11 +85,11 @@ app.use((error, req, res, next) => {
 mongoose
 
   .connect(
-    `mongodb+srv://${process.env.DB_USER}-01:${process.env.DB_PASSWORD}@cluster0.2mjlv.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
+    'mongodb+srv://malek-01:kisstherain@cluster0.2mjlv.mongodb.net/OyemUnity?retryWrites=true&w=majority',
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(result => {
-    app.listen(process.env.PORT || 5000);
+    app.listen(5000);
   })
   .catch(err => console.log(err));
 
